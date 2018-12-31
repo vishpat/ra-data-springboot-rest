@@ -88,14 +88,14 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson) => {
     switch (type) {
       case GET_LIST:
       case GET_MANY_REFERENCE:
-        if (!json.hasOwnProperty(numberOfElements)) {
+        if (!json.hasOwnProperty("totalElements")) {
           throw new Error(
             "The numberOfElements property must be must be present in the Json response"
           );
         }
         return {
           data: json.content,
-          total: parseInt(json.numberOfElements, 10)
+          total: parseInt(json.totalElements, 10)
         };
       case CREATE:
         return { data: { ...params.data, id: json.id } };
