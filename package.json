@@ -1,0 +1,33 @@
+{
+  "name": "ra-data-springboot-rest",
+  "version": "1.0.0",
+  "description": "React Admin Data Provider for SpringBoot REST",
+  "main": "lib/index.js",
+  "module": "esm/index.js",
+  "files": ["*.md", "lib", "esm", "src"],
+  "scripts": {
+    "build": "yarn run build-cjs && yarn run build-esm",
+    "build-cjs": "rimraf ./lib && tsc",
+    "build-esm": "rimraf ./esm && tsc --outDir esm --module es2015",
+    "watch": "rimraf ./lib && tsc --watch"
+  },
+  "dependencies": {
+    "query-string": "~5.1.1",
+    "react-admin": "^2.5.2"
+  },
+  "devDependencies": {
+    "cross-env": "^5.2.0",
+    "rimraf": "^2.6.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vishpat/ra-data-springboot-rest.git"
+  },
+  "keywords": ["react-admin", "spring", "boot", "REST", "java", "swagger"],
+  "author": "Vishal Patil",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vishpat/ra-data-springboot-rest/issues"
+  },
+  "homepage": "https://github.com/vishpat/ra-data-springboot-rest#readme"
+}
