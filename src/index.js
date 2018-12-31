@@ -13,14 +13,12 @@ import {
 } from "react-admin";
 
 /**
- * Maps react-admin queries to a simple REST API
+ * Maps react-admin queries to a REST API implemented using Java Spring Boot and Swagger
  *
- * The REST dialect is similar to the one of FakeRest
- * @see https://github.com/marmelab/FakeRest
  * @example
- * GET_LIST     => GET http://my.api.url/posts?sort=['title','ASC']&range=[0, 24]
+ * GET_LIST     => GET http://my.api.url/posts?page=0&pageSize=10
  * GET_ONE      => GET http://my.api.url/posts/123
- * GET_MANY     => GET http://my.api.url/posts?filter={ids:[123,456,789]}
+ * GET_MANY     => GET http://my.api.url/posts?id=1234&id=5678
  * UPDATE       => PUT http://my.api.url/posts/123
  * CREATE       => POST http://my.api.url/posts
  * DELETE       => DELETE http://my.api.url/posts/123
@@ -38,13 +36,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson) => {
     switch (type) {
       case GET_LIST: {
         const { page, perPage } = params.pagination;
-        const { field, order } = params.sort;
-        const query = {
-          sort: JSON.stringify([field, order]),
-          range: JSON.stringify([(page - 1) * perPage, page * perPage - 1]),
-          filter: JSON.stringify(params.filter)
-        };
-        url = `${apiUrl}/${resource}?${stringify(query)}`;
+        url = `${apiUrl}/${resource}?page=${page}&pageSize=${perPage}`;
         break;
       }
       case GET_ONE:
@@ -54,21 +46,14 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson) => {
         const query = {
           filter: JSON.stringify({ id: params.ids })
         };
-        url = `${apiUrl}/${resource}?${stringify(query)}`;
+        let idStr = "";
+        const queryString = params.ids.map(id => idStr + `id=${id}`);
+        url = `${apiUrl}/${resource}?${idStr}}`;
         break;
       }
       case GET_MANY_REFERENCE: {
         const { page, perPage } = params.pagination;
-        const { field, order } = params.sort;
-        const query = {
-          sort: JSON.stringify([field, order]),
-          range: JSON.stringify([(page - 1) * perPage, page * perPage - 1]),
-          filter: JSON.stringify({
-            ...params.filter,
-            [params.target]: params.id
-          })
-        };
-        url = `${apiUrl}/${resource}?${stringify(query)}`;
+        url = `${apiUrl}/${resource}?page=${page}&pageSize=${perPage}`;
         break;
       }
       case UPDATE:
@@ -103,14 +88,14 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson) => {
     switch (type) {
       case GET_LIST:
       case GET_MANY_REFERENCE:
-        if (!headers.has("content-range")) {
+        if (!json.hasOwnProperty(numberOfElements)) {
           throw new Error(
-            "The Content-Range header is missing in the HTTP Response. The simple REST data provider expects responses for lists of resources to contain this header with the total number of results to build the pagination. If you are using CORS, did you declare Content-Range in the Access-Control-Expose-Headers header?"
+            "The numberOfElements property must be must be present in the Json response"
           );
         }
         return {
-          data: json,
-          total: parseInt(headers.get("content-range").split("/").pop(), 10)
+          data: json.content,
+          total: parseInt(json.numberOfElements, 10)
         };
       case CREATE:
         return { data: { ...params.data, id: json.id } };
